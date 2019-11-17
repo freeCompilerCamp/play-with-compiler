@@ -1,0 +1,181 @@
+FROM fcc_dind:0.1
+
+RUN apt update && \
+    apt-get update && \
+    apt-get -y install git tmux python-pip apache2-utils vim build-essential gettext curl bash-completion bash util-linux jq openssh-client openssl tree cmake man
+
+# Adding user freecc
+RUN groupadd -g 9999 freecc && \
+    useradd -r -u 9999 -g freecc -m -d /home/freecc freecc
+
+ENV GOPATH /home/freecc/go
+ENV PATH $PATH:$GOPATH
+
+# Install httping
+RUN apt-get -y install httping
+
+# Install ROSE pre-requisite
+RUN apt-get install -y \
+        apt-utils \
+        dialog \
+        python-software-properties \
+        software-properties-common
+# Install Java JDK
+RUN add-apt-repository ppa:openjdk-r/ppa
+RUN apt-get update
+RUN apt-get install -y openjdk-8-jdk
+# Install ROSE dependency
+RUN apt-get install -y \
+        autoconf \
+        automake \
+        autotools-dev \
+        bc \
+        binutils \
+        bison \
+        build-essential \
+        cmake \
+        cpufrequtils \
+        curl \
+        device-tree-compiler \
+        dkms \
+        doxygen \
+        flex \
+        gawk \
+        gcc-multilib \
+        gdb \
+        gfortran \
+        ghostscript \
+        git \
+        gperf \
+        graphviz \
+        libboost-all-dev \
+        libgmp-dev \
+        libhpdf-dev \
+        libmpc-dev \
+        libmpfr-dev \
+        libomp-dev \
+        libtool \
+        libxml2-dev \
+        patchutils \
+        perl-doc \
+        python3-dev \
+        sqlite \
+        texinfo \
+        unzip \
+        vim \
+        wget \
+        zip \
+        zlib1g \
+        zlib1g-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/*
+
+ENV DOCKERAPP_VERSION=v0.6.0
+ENV COMPOSE_VERSION=1.23.2
+# Install Compose and Machine
+RUN pip install docker-compose==${COMPOSE_VERSION}
+
+RUN curl -fsSL --output /tmp/docker-app-linux.tar.gz https://github.com/docker/app/releases/download/${DOCKERAPP_VERSION}/docker-app-linux.tar.gz \
+    && tar xf "/tmp/docker-app-linux.tar.gz" -C /usr/bin/ && mv /usr/bin/docker-app-linux /usr/bin/docker-app && rm /tmp/docker-app-linux.tar.gz
+
+# Add bash completion and set bash as default shell
+#RUN mkdir /etc/bash_completion.d \
+RUN curl https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker -o /etc/bash_completion.d/docker \
+    && sed -i "s/ash/bash/" /etc/passwd
+ 
+# Replace modprobe with a no-op to get rid of spurious warnings
+# (note: we can't just symlink to /bin/true because it might be busybox)
+#RUN rm /sbin/modprobe && echo '#!/bin/true' >/sbin/modprobe && chmod +x /sbin/modprobe
+RUN echo '#!/bin/true' > /sbin/modprobe && chmod +x /sbin/modprobe
+
+# Install a nice vimrc file and prompt (by soulshake)
+COPY ["docker-prompt", "sudo", "/usr/local/bin/"]
+COPY ["motd", "/etc/motd"]
+COPY ["daemon.json", "/etc/docker/"]
+
+# Remove IPv6 alias for localhost and start docker in the background ...
+CMD cat /etc/hosts > /home/freecc/.hosts.bak && \
+    sed 's/^::1.*//' /home/freecc/.hosts.bak > /etc/hosts && \
+    sed -i "s/\PWD_IP_ADDRESS/$PWD_IP_ADDRESS/" /etc/docker/daemon.json && \
+    sed -i "s/\DOCKER_TLSENABLE/$DOCKER_TLSENABLE/" /etc/docker/daemon.json && \
+    sed -i "s/\DOCKER_TLSCACERT/$DOCKER_TLSCACERT/" /etc/docker/daemon.json && \
+    sed -i "s/\DOCKER_TLSCERT/$DOCKER_TLSCERT/" /etc/docker/daemon.json && \
+    sed -i "s/\DOCKER_TLSKEY/$DOCKER_TLSKEY/" /etc/docker/daemon.json && \
+    mount -t securityfs none /sys/kernel/security && \
+    echo "root:root" | chpasswd &> /dev/null && \
+    /usr/sbin/sshd -o PermitRootLogin=yes -o PrintMotd=no 2>/dev/null && \
+    dockerd &> /home/freecc/.docker.log & \
+    while true ; do script -q -c "/bin/bash -l" /dev/null ; done
+# ... and then put a shell in the foreground, restarting it if it exits
+
+# Setup certs and ssh keys
+RUN mkdir -p /var/run/pwd/certs && mkdir -p /var/run/pwd/uploads \
+    && ssh-keygen -N "" -t rsa -f  /etc/ssh/ssh_host_rsa_key >/dev/null
+
+# Switch user to freecc
+USER freecc
+
+# Install LLVM
+ENV LLVM_SRC /home/freecc/source/llvm_src
+ENV LLVM_PATH /home/freecc/install/llvm_install
+ENV LLVM_BUILD /home/freecc/build/llvm_build
+
+RUN mkdir -p $LLVM_SRC && \
+    mkdir -p $LLVM_PATH && \
+    mkdir -p $LLVM_BUILD && \
+    cd $LLVM_SRC && \
+    git clone https://github.com/chunhualiao/clang-llvm-tutorials.git . && \
+    cd $LLVM_BUILD && \
+    cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DCLANG_BUILD_EXAMPLES=1 $LLVM_SRC && \
+    make -j8 install
+
+ENV PATH $LLVM_PATH/bin:$PATH
+ENV LD_LIBRARY_PATH $LLVM_PATH/libexec:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH $LLVM_PATH/lib:$LD_LIBRARY_PATH
+ENV LIBRARY_PATH $LLVM_PATH/libexec:$LIBRARY_PATH
+ENV LIBRARY_PATH $LLVM_PATH/lib:$LIBRARY_PATH
+ENV MANPATH $LLVM_PATH/share/man:$MANPATH
+ENV C_INCLUDE_PATH $LLVM_PATH/include:$C_INCLUDE_PATH
+ENV CPLUS_INCLUDE_PATH $LLVM_PATH/include:CPLUS_INCLUDE_PATH
+
+# Install ROSE
+# Prepare installation
+ENV ROSE_SRC /home/freecc/source/rose_src
+ENV ROSE_PATH /home/freecc/install/rose_install
+ENV ROSE_BUILD /home/freecc/build/rose_build
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV LD_LIBRARY_PATH $JAVA_HOME/jre/lib/amd64/server:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+RUN mkdir -p $ROSE_PATH && \
+    mkdir -p $ROSE_BUILD && \
+    git clone https://github.com/rose-compiler/rose.git $ROSE_SRC && \
+    cd $ROSE_SRC && \
+    ./build && \
+    cd $ROSE_BUILD && \
+    $ROSE_SRC/configure --prefix=$ROSE_PATH --with-boost=/usr --with-boost-libdir=/usr/lib/x86_64-linux-gnu/ --enable-languages=c,c++,fortran --enable-projects-directory --disable-tests-directory --disable-tutorial-directory --enable-edg_version=5.0 --with-gomp_omp_runtime_library=/usr/lib/gcc/x86_64-linux-gnu/5
+# Compile ROSE
+RUN cd $ROSE_BUILD && \
+    make core -j4 && \
+    make install-core
+# Setup ROSE environment
+ENV PATH $ROSE_PATH/bin:$PATH
+ENV LD_LIBRARY_PATH $ROSE_PATH/lib:$LD_LIBRARY_PATH
+ENV LIBRARY_PATH $ROSE_PATH/lib:$LIBRARY_PATH
+ENV MANPATH $ROSE_PATH/share/man:$MANPATH
+RUN alias ls='ls --color=auto'
+
+# Move to our home
+WORKDIR /home/freecc
+
+#Install ninja
+RUN wget https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip
+RUN unzip ninja-linux.zip
+RUN mkdir /home/freecc/bin/
+RUN mv ninja /home/freecc/bin/
+RUN rm ninja-linux.zip
+
+# Setup certs and ssh keys
+RUN mkdir ~/.ssh && ssh-keygen -N "" -t rsa -f ~/.ssh/id_rsa \
+    && cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
+
+COPY [".vimrc", ".profile", ".inputrc", ".gitconfig", "/home/freecc/"]

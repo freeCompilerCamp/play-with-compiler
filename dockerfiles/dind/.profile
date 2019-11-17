@@ -1,6 +1,12 @@
-export PS1='\e[1m\e[31m[\h] \e[32m($(docker-prompt)) \e[34m\u@$(hostname -i)\e[35m \w\e[0m\n$ '
-alias vi='vim'
-export PATH=$PATH:/root/go/bin
-export DOCKER_HOST=""
+export PS1='\[\033[01;32m\]\u@\h:\W$ \[\033[0m\]'
+
+export PATH=$HOME/bin:$HOME/.local/bin:$PATH
+clear
 cat /etc/motd
-echo $BASHPID > /var/run/cwd
+#echo $BASHPID > /var/run/cwd
+
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias ls='ls --color=auto'
+alias vi='vim'
