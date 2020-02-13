@@ -2,6 +2,7 @@ version: '3.2'
 services:
     haproxy:
         container_name: haproxy
+        restart: always
         image: haproxy
         ports:
             - "5010:8080"
@@ -11,6 +12,7 @@ services:
     pwd:
         # pwd daemon container always needs to be named this way
         container_name: pwd
+        restart: always
         # use the latest golang image
         image: golang
         # go to the right place and starts the app
@@ -23,6 +25,7 @@ services:
             - sessions:/pwd
     l2:
         container_name: l2
+        restart: always
         # use the latest golang image
         image: golang
         # go to the right place and starts the app
