@@ -1,23 +1,28 @@
-FROM fcc_docker:0.1
+FROM freecompilercamp/pwc:base
 
 RUN set -eux; \
     apt-get -y install \
-    btrfs-tools \
-    e2fsprogs \
-    iptables \
-    xfsprogs \
-    xz-utils \
-    pigz \
-; \
+       btrfs-tools \
+       e2fsprogs \
+       iptables \
+       openssl \
+       uidmap \
+       xfsprogs \
+       xz-utils \
+# pigz: https://github.com/moby/moby/pull/35697 (faster gzip implementation)
+       pigz \
+    ; \
 # only install zfs if it's available for the current architecture
 if zfs="$(apt-cache policy zfs | grep Candidate | grep none)" && [ -z "$zfs" ]; then \
     apt-get -y install zfs; \
 fi
 
+
+# TODO aufs-tools
+
 # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
 RUN set -x \
     && addgroup --system dockremap \
-    #&& adduser -S -G dockremap dockremap \
     && useradd --system -g dockremap dockremap \
     && echo 'dockremap:165536:65536' >> /etc/subuid \
     && echo 'dockremap:165536:65536' >> /etc/subgid
@@ -30,13 +35,9 @@ RUN set -eux; \
     chmod +x /usr/local/bin/dind
 
 COPY dockerd-entrypoint.sh /usr/local/bin/
-RUN ls -l /usr/local/bin/dockerd-en*
-ENV PATH /usr/local/bin:$PATH
 
 VOLUME /var/lib/docker
-EXPOSE 2375
-
+EXPOSE 2375 2376
 
 ENTRYPOINT ["dockerd-entrypoint.sh"]
 CMD []
-

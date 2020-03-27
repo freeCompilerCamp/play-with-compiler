@@ -1,4 +1,4 @@
-FROM fcc_dind:0.1
+FROM freecompilercamp/pwc:middle
 
 RUN apt update && \
     apt-get update && \
@@ -18,11 +18,8 @@ RUN apt-get -y install httping
 RUN apt-get install -y \
         apt-utils \
         dialog \
-        python-software-properties \
         software-properties-common
 # Install Java JDK
-RUN add-apt-repository ppa:openjdk-r/ppa
-RUN apt-get update
 RUN apt-get install -y openjdk-8-jdk
 # Install ROSE dependency
 RUN apt-get install -y \
@@ -70,13 +67,13 @@ RUN apt-get install -y \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/*
 
-ENV DOCKERAPP_VERSION=v0.6.0
+ENV DOCKERAPP_VERSION=v0.8.0
 ENV COMPOSE_VERSION=1.23.2
 # Install Compose and Machine
 RUN pip install docker-compose==${COMPOSE_VERSION}
 
 RUN curl -fsSL --output /tmp/docker-app-linux.tar.gz https://github.com/docker/app/releases/download/${DOCKERAPP_VERSION}/docker-app-linux.tar.gz \
-    && tar xf "/tmp/docker-app-linux.tar.gz" -C /usr/bin/ && mv /usr/bin/docker-app-linux /usr/bin/docker-app && rm /tmp/docker-app-linux.tar.gz
+    && tar xf "/tmp/docker-app-linux.tar.gz" -C /tmp/ && mkdir -p /root/.docker/cli-plugins && mv /tmp/docker-app-plugin-linux /root/.docker/cli-plugins/docker-app && rm /tmp/docker-app*
 
 # Add bash completion and set bash as default shell
 #RUN mkdir /etc/bash_completion.d \
@@ -152,7 +149,7 @@ RUN mkdir -p $ROSE_PATH && \
     cd $ROSE_SRC && \
     ./build && \
     cd $ROSE_BUILD && \
-    $ROSE_SRC/configure --prefix=$ROSE_PATH --with-boost=/usr --with-boost-libdir=/usr/lib/x86_64-linux-gnu/ --enable-languages=c,c++,fortran --enable-projects-directory --disable-tests-directory --disable-tutorial-directory --enable-edg_version=5.0 --with-gomp_omp_runtime_library=/usr/lib/gcc/x86_64-linux-gnu/5
+    $ROSE_SRC/configure --prefix=$ROSE_PATH --with-boost=/usr --with-boost-libdir=/usr/lib/x86_64-linux-gnu/ --enable-languages=c,c++,fortran --enable-projects-directory --disable-tests-directory --disable-tutorial-directory --enable-edg_version=5.0 --with-gomp_omp_runtime_library=/usr/lib/gcc/x86_64-linux-gnu/7
 # Compile ROSE
 RUN cd $ROSE_BUILD && \
     make core -j4 && \
