@@ -63,7 +63,8 @@ RUN apt-get install -y \
         wget \
         zip \
         zlib1g \
-        zlib1g-dev && \
+        zlib1g-dev \
+        ninja-build && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/*
 
@@ -121,10 +122,10 @@ RUN mkdir -p $LLVM_SRC && \
     mkdir -p $LLVM_PATH && \
     mkdir -p $LLVM_BUILD && \
     cd $LLVM_SRC && \
-    git clone https://github.com/chunhualiao/clang-llvm-tutorials.git . && \
+    git clone -b release/10.x https://github.com/llvm/llvm-project . && \
     cd $LLVM_BUILD && \
-    cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DCLANG_BUILD_EXAMPLES=1 $LLVM_SRC && \
-    make -j8 install
+    cmake -G Ninja -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=$LLVM_PATH -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;compiler-rt;openmp" -DCLANG_BUILD_EXAMPLES=1 $LLVM_SRC/llvm && \
+    ninja install -j8 -l8
 
 ENV PATH $LLVM_PATH/bin:$PATH
 ENV LD_LIBRARY_PATH $LLVM_PATH/libexec:$LD_LIBRARY_PATH
@@ -165,11 +166,11 @@ RUN alias ls='ls --color=auto'
 WORKDIR /home/freecc
 
 #Install ninja
-RUN wget https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip
-RUN unzip ninja-linux.zip
+#RUN wget https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip
+#RUN unzip ninja-linux.zip
 RUN mkdir /home/freecc/bin/
-RUN mv ninja /home/freecc/bin/
-RUN rm ninja-linux.zip
+RUN cp /usr/bin/ninja /home/freecc/bin/
+#RUN rm ninja-linux.zip
 
 # Setup certs and ssh keys
 RUN mkdir ~/.ssh && ssh-keygen -N "" -t rsa -f ~/.ssh/id_rsa \
