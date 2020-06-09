@@ -52,7 +52,7 @@ func main() {
 		log.Fatalf("Cannot parse duration Got: %v", err)
 	}
 
-    playground := types.Playground{Domain: config.PlaygroundDomain, DefaultDinDInstanceImage: "freecompilercamp/pwc:1.0", AvailableDinDInstanceImages: []string{"freecompilercamp/pwc:1.0"}, AllowWindowsInstances: config.NoWindows, DefaultSessionDuration: d, Tasks: []string{".*"}, Extras: map[string]interface{}{"LoginRedirect": "http://localhost:3000"}}
+	playground := types.Playground{Domain: config.PlaygroundDomain, DefaultDinDInstanceImage: "freecompilercamp/pwc:1.0", AvailableDinDInstanceImages: []string{"freecompilercamp/pwc:1.0"}, AllowWindowsInstances: config.NoWindows, DefaultSessionDuration: d, Extras: map[string]interface{}{"LoginRedirect": "http://localhost:3000"}}
 	if _, err := core.PlaygroundNew(playground); err != nil {
 		log.Fatalf("Cannot create default playground. Got: %v", err)
 	}
