@@ -60,6 +60,7 @@ func Register(extend HandlerExtender) {
 	corsHandler := gh.CORS(gh.AllowCredentials(), gh.AllowedHeaders([]string{"x-requested-with", "content-type"}), gh.AllowedMethods([]string{"GET", "POST", "HEAD", "DELETE"}), gh.AllowedOriginValidator(func(origin string) bool {
 		if strings.Contains(origin, "localhost") ||
 			strings.HasSuffix(origin, "docker.com") ||
+			strings.HasSuffix(origin, "ouankou.com") ||
 			strings.HasSuffix(origin, "freecompilercamp.org") {
 			return true
 		}
@@ -70,6 +71,7 @@ func Register(extend HandlerExtender) {
 	r.HandleFunc("/ping", Ping).Methods("GET")
 	corsRouter.HandleFunc("/instances/images", GetInstanceImages).Methods("GET")
 	corsRouter.HandleFunc("/sessions/{sessionId}", GetSession).Methods("GET")
+	corsRouter.HandleFunc("/sessions/{sessionId}/close", CloseSession).Methods("POST")
 	corsRouter.HandleFunc("/sessions/{sessionId}", CloseSession).Methods("DELETE")
 	corsRouter.HandleFunc("/sessions/{sessionId}/setup", SessionSetup).Methods("POST")
 	corsRouter.HandleFunc("/sessions/{sessionId}/instances", NewInstance).Methods("POST")
