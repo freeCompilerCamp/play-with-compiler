@@ -1,0 +1,30 @@
+name: Docker Image Base-Middle
+
+on:
+  push:
+    branches: [ master ]
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build the base image
+      run: |
+        cd $GITHUB_WORKSPACE/dockerfiles/dind
+        docker build . --file Dockerfile.base --tag fcc_base
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_ID }} --password-stdin
+        docker tag fcc_base freecompilercamp/pwc:base
+        docker push freecompilercamp/pwc:base
+
+    - name: Build the middle image
+      run: |
+        docker build . --file Dockerfile.middle --tag fcc_middle
+        docker tag fcc_middle freecompilercamp/pwc:middle
+        docker push freecompilercamp/pwc:middle
