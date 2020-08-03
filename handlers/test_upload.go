@@ -70,12 +70,43 @@ func TestUpload(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		log.Printf("Uploaded [%s] to [%s]\n", p.FileName(), i.Name)
+  }
 
-		// Step 2: compile the code
-    // TODO
+	// Step 2: compile the code
+  const jsonStream =
+  `
+    { "command": ["gcc", "test.C", "-o", "test"] }
+  `
 
-	}
-	rw.WriteHeader(http.StatusOK)
-	return
+  var er execRequest // from exec.go handler
 
+  err = json.NewDecoder(strings.NewReader(jsonStream)).Decode(&er)
+  if err != nil {
+    log.Fatal(err)
+    rw.WriteHeader(http.StatusBadRequest)
+    return
+  }
+
+  cmdout, err := core.InstanceExecOutput(i, er.Cmd)
+
+  if err != nil {
+    log.Println(err)
+    rw.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+
+  /*
+  buf := new(strings.Builder)
+  io.Copy(buf, cmdout)
+  log.Println(buf.String())
+  */
+
+  rw.Header().Set("content-type", "application/json")
+  if _, err = io.Copy(rw, cmdout); err != nil {
+    log.Println(err)
+    rw.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+  rw.WriteHeader(http.StatusOK)
+  return
 }
