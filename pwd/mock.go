@@ -87,6 +87,11 @@ func (m *Mock) InstanceExec(instance *types.Instance, cmd []string) (int, error)
 	return args.Int(0), args.Error(1)
 }
 
+func (m *Mock) InstanceExecOutput(instance *types.Instance, cmd []string) (io.Reader, error) {
+	args := m.Called(instance, cmd)
+	return args.Get(0).(io.Reader), args.Error(1)
+}
+
 func (m *Mock) InstanceFSTree(instance *types.Instance) (io.Reader, error) {
 	args := m.Called(instance)
 	return args.Get(0).(io.Reader), args.Error(1)

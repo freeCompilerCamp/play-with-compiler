@@ -151,6 +151,29 @@ func (d *DinD) InstanceExec(instance *types.Instance, cmd []string) (int, error)
 	return dockerClient.Exec(instance.Name, cmd)
 }
 
+// For PWC closed-book testing, like InstanceExec except returns the output of
+// command.
+func (d *DinD) InstanceExecOutput(instance *types.Instance, cmd []string) (io.Reader, error) {
+	session, err := d.getSession(instance.SessionId)
+	if err!= nil {
+		return nil, err
+	}
+	dockerClient, err := d.factory.GetForSession(session)
+	if err != nil {
+		return nil, err
+	}
+	b := bytes.NewBuffer([]byte{})
+
+	if c,err := dockerClient.ExecAttach(instance.Name, cmd, b); c > 0 {
+		log.Println(b.String())
+		return nil, fmt.Errorf("Error %d trying to run command", c)
+	} else if err != nil {
+		return nil, err
+	}
+
+	return b, nil
+}
+
 func (d *DinD) InstanceFSTree(instance *types.Instance) (io.Reader, error) {
 	session, err := d.getSession(instance.SessionId)
 	if err != nil {
