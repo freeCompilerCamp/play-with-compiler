@@ -144,8 +144,8 @@ RUN alias ls='ls --color=auto'
 
 RUN mkdir $ROSE_SRC/freecc_tests
 
-# Move to our home
-WORKDIR /home/freecc
+# Move to the testing directory
+WORKDIR /home/freecc/source/rose_src/freecc_tests
 
 # Setup certs and ssh keys
 RUN mkdir ~/.ssh && ssh-keygen -N "" -t rsa -f ~/.ssh/id_rsa \
