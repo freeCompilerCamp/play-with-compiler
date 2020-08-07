@@ -152,7 +152,7 @@ func (d *DinD) InstanceExec(instance *types.Instance, cmd []string) (int, error)
 }
 
 // For PWC closed-book testing, like InstanceExec except returns the output of
-// command.
+// command. Can also return any errors (stdout or stderr supported)
 func (d *DinD) InstanceExecOutput(instance *types.Instance, cmd []string) (io.Reader, error) {
 	session, err := d.getSession(instance.SessionId)
 	if err!= nil {
@@ -166,7 +166,7 @@ func (d *DinD) InstanceExecOutput(instance *types.Instance, cmd []string) (io.Re
 
 	if c,err := dockerClient.ExecAttach(instance.Name, cmd, b); c > 0 {
 		log.Println(b.String())
-		return nil, fmt.Errorf("Error %d trying to run command", c)
+		//return nil, fmt.Errorf("Error %d trying to run command", c)
 	} else if err != nil {
 		return nil, err
 	}
