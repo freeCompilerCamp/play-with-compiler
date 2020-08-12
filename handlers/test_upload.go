@@ -80,14 +80,24 @@ func TestUpload(rw http.ResponseWriter, req *http.Request) {
   // Grab the test name that we will use to match the directory at the host endpoint
   testName := req.URL.Query().Get("testname")
 
+  // Get the cut length from the resource host endpoint. We need this for wget.
+  // If the endpoint contains http or https, we ignore that.
+  // e.g.: if the endpoint is https://localhost/llnl-freecompilercamp/freecc_tests/
+  // the cutlength is 3.
+  var cutlen = strings.Count(config.TestEndpoint, "/")
+  if strings.Contains(config.TestEndpoint, "http") || strings.Contains(config.TestEndpoint, "https") {
+    cutlen = cutlen - 2
+  }
+
   // NOTE: The default WORKDIR set by the special rose-test and llvm-test images
   // is the directory where code is uploaded. All of the commands below are
   // executed in that directory implicitly (no need to cd)
+  // cutlen + 1 because it includes the folder for this specific test.
   var wgetCmd = fmt.Sprintf(
     `{ "command":
-    ["wget", "-r", "-np", "-R", "index.html*", "-nH", "--cut-dirs=4",
+    ["wget", "-r", "-np", "-R", "index.html*", "-nH", "--cut-dirs=%d",
     "%s/%s/"] }`,
-    config.TestEndpoint, testName)
+    cutlen + 1, config.TestEndpoint, testName)
 
   var er1 execRequest // from exec.go handler
 
@@ -135,8 +145,10 @@ func TestUpload(rw http.ResponseWriter, req *http.Request) {
   log.Println(buf.String())
   */
 
+  //req.Header.Add("Accept-Charset","utf-8")
+
   // TODO: Format the response so that we can do some processing on errors
-  rw.Header().Set("content-type", "application/json")
+  rw.Header().Set("content-type", "text/html")
   if _, err = io.Copy(rw, cmdout); err != nil {
     log.Println(err)
     rw.WriteHeader(http.StatusInternalServerError)
