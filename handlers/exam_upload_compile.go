@@ -23,7 +23,7 @@ import (
 	"github.com/play-with-docker/play-with-docker/storage"
 )
 
-func TestUpload(rw http.ResponseWriter, req *http.Request) {
+func ExamUploadCompile(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	sessionId := vars["sessionId"]
 	instanceName := vars["instanceName"]
@@ -75,27 +75,27 @@ func TestUpload(rw http.ResponseWriter, req *http.Request) {
 
 	// Step 1.5: Grab resources from server/endpoint
 
-  // Grab the test name that we will use to match the directory at the host endpoint
-  testName := req.URL.Query().Get("testname")
+  // Grab the exam name that we will use to match the directory at the host endpoint
+  examName := req.URL.Query().Get("examname")
 
   // Get the cut length from the resource host endpoint. We need this for wget.
   // If the endpoint contains http or https, we ignore that.
   // e.g.: if the endpoint is https://localhost/llnl-freecompilercamp/freecc_tests/
   // the cutlength is 3.
-  var cutlen = strings.Count(config.TestEndpoint, "/")
-  if strings.Contains(config.TestEndpoint, "http") || strings.Contains(config.TestEndpoint, "https") {
+  var cutlen = strings.Count(config.ExamEndpoint, "/")
+  if strings.Contains(config.ExamEndpoint, "http") || strings.Contains(config.ExamEndpoint, "https") {
     cutlen = cutlen - 2
   }
 
-  // NOTE: The default WORKDIR set by the special rose-test and llvm-test images
+  // NOTE: The default WORKDIR set by the special rose-exam and llvm-exam images
   // is the directory where code is uploaded. All of the commands below are
   // executed in that directory implicitly (no need to cd)
-  // cutlen + 1 because it includes the folder for this specific test.
+  // cutlen + 1 because it includes the folder for this specific exam.
   var wgetCmd = fmt.Sprintf(
     `{ "command":
     ["wget", "-r", "-np", "-R", "index.html*", "-nH", "--cut-dirs=%d",
     "%s/%s/"] }`,
-    cutlen + 1, config.TestEndpoint, testName)
+    cutlen + 1, config.ExamEndpoint, examName)
 
   var er1 execRequest // from exec.go handler
 
@@ -114,7 +114,7 @@ func TestUpload(rw http.ResponseWriter, req *http.Request) {
     return
   }
 
-  log.Printf("Obtained test resources from endpoint.")
+  log.Printf("Obtained exam resources from endpoint.")
 
 
   // Step 2: Compile via make

@@ -68,7 +68,7 @@ func Register(extend HandlerExtender) {
 	}), gh.AllowedOrigins([]string{}))
 
 	// Specific routes
-	// "testuploads" endpoint added for closed-book testing in PWC
+	// "examuploadcompile" endpoint added for closed-book exams in PWC
 	r.HandleFunc("/ping", Ping).Methods("GET")
 	corsRouter.HandleFunc("/instances/images", GetInstanceImages).Methods("GET")
 	corsRouter.HandleFunc("/sessions/{sessionId}", GetSession).Methods("GET")
@@ -77,7 +77,7 @@ func Register(extend HandlerExtender) {
 	corsRouter.HandleFunc("/sessions/{sessionId}/setup", SessionSetup).Methods("POST")
 	corsRouter.HandleFunc("/sessions/{sessionId}/instances", NewInstance).Methods("POST")
 	corsRouter.HandleFunc("/sessions/{sessionId}/instances/{instanceName}/uploads", FileUpload).Methods("POST")
-	corsRouter.HandleFunc("/sessions/{sessionId}/instances/{instanceName}/testuploads", TestUpload).Methods("POST")
+	corsRouter.HandleFunc("/sessions/{sessionId}/instances/{instanceName}/examuploadcompile", ExamUploadCompile).Methods("POST")
 	corsRouter.HandleFunc("/sessions/{sessionId}/instances/{instanceName}", DeleteInstance).Methods("DELETE")
 	corsRouter.HandleFunc("/sessions/{sessionId}/instances/{instanceName}/exec", Exec).Methods("POST")
 	corsRouter.HandleFunc("/sessions/{sessionId}/instances/{instanceName}/fstree", fsTree).Methods("GET")
