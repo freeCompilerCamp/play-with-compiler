@@ -34,7 +34,7 @@ var PlaygroundDomain string
 
 var SegmentId string
 
-var TestEndpoint string // endpoint for hosting closed-book test content
+var ExamEndpoint string // endpoint for hosting closed-book test content
 
 // TODO move this to a sync map so it can be updated on demand when the configuration for a playground changes
 var Providers = map[string]map[string]*oauth2.Config{}
@@ -62,7 +62,7 @@ func ParseFlags() {
 
 	flag.StringVar(&SegmentId, "segment-id", "", "Segment id to post metrics")
 
-	flag.StringVar(&TestEndpoint, "test-endpoint", "http://192.168.64.2/llnl-freecompilercamp/freecc_tests/", "Resource host endpoint for closed-book testing")
+	flag.StringVar(&ExamEndpoint, "exam-endpoint", "http://192.168.64.2/llnl-freecompilercamp/freecc_tests/", "Resource host endpoint for closed-book exams")
 
 	flag.Parse()
 
