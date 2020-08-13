@@ -146,11 +146,11 @@ func ExamUploadCompile(rw http.ResponseWriter, req *http.Request) {
   io.Copy(buf, cmdout)
   log.Println(buf.String())
 
-  // Parses the make response the word "Error" that shows when make fails.
+  // Parses the make response the word "Error" or "Stop" that shows when make fails.
   // If there is an error, send it back with the HTTP response. Else, send success.
   // NOTE: We send back a 502 (Bad Gateway) on compile error, along with the error(s).
   // Client should handle this appropriately (check if 502 and print error)
-  if strings.Contains(buf.String(), "Error") {
+  if strings.Contains(buf.String(), "Error") || strings.Contains(buf.String(), "Stop") {
     comperr := strings.NewReader(buf.String())
     rw.WriteHeader(http.StatusBadGateway)
     if _,err = io.Copy(rw, comperr); err != nil {
