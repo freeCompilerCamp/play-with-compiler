@@ -155,10 +155,6 @@ func (d *windows) InstanceExec(instance *types.Instance, cmd []string) (int, err
 	return ex.ExitCode, nil
 }
 
-func (d *windows) InstanceExecOutput(instance *types.Instance, cmd []string) (io.Reader, error) {
-	return nil, nil
-}
-
 func (d *windows) InstanceFSTree(instance *types.Instance) (io.Reader, error) {
 	//TODO implement
 	return nil, nil

@@ -34,8 +34,6 @@ var PlaygroundDomain string
 
 var SegmentId string
 
-var ExamEndpoint string // endpoint for hosting closed-book test content
-
 // TODO move this to a sync map so it can be updated on demand when the configuration for a playground changes
 var Providers = map[string]map[string]*oauth2.Config{}
 
@@ -57,12 +55,10 @@ func ParseFlags() {
 	flag.StringVar(&CookieHashKey, "cookie-hash-key", "", "Hash key to use to validate cookies")
 	flag.StringVar(&CookieBlockKey, "cookie-block-key", "", "Block key to use to encrypt cookies")
 
-	flag.StringVar(&PlaygroundDomain, "playground-domain", "lab.freecompilercamp.org:5010", "Domain to use for the playground")
+    flag.StringVar(&PlaygroundDomain, "playground-domain", "lab.freecompilercamp.org:5010", "Domain to use for the playground")
 	flag.StringVar(&AdminToken, "admin-token", "", "Token to validate admin user for admin endpoints")
 
 	flag.StringVar(&SegmentId, "segment-id", "", "Segment id to post metrics")
-
-	flag.StringVar(&ExamEndpoint, "exam-endpoint", "http://ec2-54-241-120-89.us-west-1.compute.amazonaws.com/llnl-freecompilercamp/freecc_exams/", "Resource host endpoint for closed-book exams")
 
 	flag.Parse()
 
