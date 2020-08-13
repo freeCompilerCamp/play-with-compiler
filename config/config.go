@@ -62,7 +62,7 @@ func ParseFlags() {
 
 	flag.StringVar(&SegmentId, "segment-id", "", "Segment id to post metrics")
 
-	flag.StringVar(&ExamEndpoint, "exam-endpoint", "http://192.168.64.2/llnl-freecompilercamp/freecc_tests/", "Resource host endpoint for closed-book exams")
+	flag.StringVar(&ExamEndpoint, "exam-endpoint", "http://ec2-54-241-120-89.us-west-1.compute.amazonaws.com/llnl-freecompilercamp/freecc_exams/", "Resource host endpoint for closed-book exams")
 
 	flag.Parse()
 
