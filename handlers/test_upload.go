@@ -3,11 +3,9 @@
 * It does the following:
 *   - Uploads the code to the instance via the multipart form data
 *   - Compiles the code
-*   - Once all are done, runs the test cases on the compiled code
-*   - Returns an HTTP response once the above steps are completed
-* Compiler errors should be returned with the response and stop there.
-* Test case errors should be returned with the response and stop there.
-* Else pass.
+* HTTP Response back contains the compilation status (success or fail), and
+* any errors if fail.
+* NOTE: We do not suppress compiler warnings, this is the job of the Makefile.
 */
 
 package handlers
@@ -120,16 +118,19 @@ func TestUpload(rw http.ResponseWriter, req *http.Request) {
 
 
   // Step 2: Compile via make
-  var makeCmd = `{ "command": ["make"] }`
+
+  var makeCmd = `{ "command": ["make", "-B"] }`
 
   var er2 execRequest // from exec.go handler
 
   err = json.NewDecoder(strings.NewReader(makeCmd)).Decode(&er2)
   if err != nil {
     log.Fatal(err)
-    rw.WriteHeader(http.StatusBadRequest)
+    rw.WriteHeader(http.StatusInternalServerError)
     return
   }
+
+  // Step 2.5: Check if make compilation was successful
 
   cmdout, err := core.InstanceExecOutput(i, er2.Cmd)
 
@@ -139,20 +140,32 @@ func TestUpload(rw http.ResponseWriter, req *http.Request) {
     return
   }
 
-  /*
+  rw.Header().Set("content-type", "text/html")
+
   buf := new(strings.Builder)
   io.Copy(buf, cmdout)
   log.Println(buf.String())
-  */
 
-  //req.Header.Add("Accept-Charset","utf-8")
-
-  // TODO: Format the response so that we can do some processing on errors
-  rw.Header().Set("content-type", "text/html")
-  if _, err = io.Copy(rw, cmdout); err != nil {
-    log.Println(err)
-    rw.WriteHeader(http.StatusInternalServerError)
+  // Parses the make response the word "Error" that shows when make fails.
+  // If there is an error, send it back with the HTTP response. Else, send success.
+  // NOTE: We send back a 502 (Bad Gateway) on compile error, along with the error(s).
+  // Client should handle this appropriately (check if 502 and print error)
+  if strings.Contains(buf.String(), "Error") {
+    comperr := strings.NewReader(buf.String())
+    rw.WriteHeader(http.StatusBadGateway)
+    if _,err = io.Copy(rw, comperr); err != nil {
+      log.Println(err)
+      rw.WriteHeader(http.StatusInternalServerError)
+      return
+    }
     return
+  } else {
+    suc := strings.NewReader("BUILD SUCCESSFUL.")
+    if _,err = io.Copy(rw, suc); err != nil {
+      log.Println(err)
+      rw.WriteHeader(http.StatusInternalServerError)
+      return
+    }
   }
 
   rw.WriteHeader(http.StatusOK)
