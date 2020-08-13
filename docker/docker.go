@@ -221,8 +221,7 @@ func (d *docker) CopyToContainer(containerName, destination, fileName string, co
 	}
 	t := tar.NewWriter(w)
 	go func() {
-		// Have to use uid and gid rather than uname and gname. FreeCC user uid and gid is 9999.
-		t.WriteHeader(&tar.Header{Name: fileName, Mode: 0600, Size: int64(len(b)), Uid: 9999, Gid: 9999, ModTime: time.Now()})
+		t.WriteHeader(&tar.Header{Name: fileName, Mode: 0600, Size: int64(len(b)), ModTime: time.Now()})
 		t.Write(b)
 		t.Close()
 		w.Close()

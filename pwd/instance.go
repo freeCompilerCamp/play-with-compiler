@@ -140,16 +140,6 @@ func (p *pwd) InstanceExec(instance *types.Instance, cmd []string) (int, error) 
 	return exitCode, nil
 }
 
-func (p *pwd) InstanceExecOutput(instance *types.Instance, cmd []string) (io.Reader, error) {
-	defer observeAction("InstanceExecOutput", time.Now())
-
-	prov, err := p.getProvisioner(instance.Type)
-	if err != nil {
-		return nil, err
-	}
-	return prov.InstanceExecOutput(instance, cmd)
-}
-
 func (p *pwd) InstanceFSTree(instance *types.Instance) (io.Reader, error) {
 	defer observeAction("InstanceFSTree", time.Now())
 
