@@ -38,8 +38,8 @@ func ExamRun(rw http.ResponseWriter, req *http.Request) {
 
   // Step 1: Make sure the uploaded code has been compiled.
   var lsCmd = fmt.Sprintf(
-    `{ "command": ["ls", "%s"] }`,
-    examName + "_submission")
+    `{ "command": ["ls", "exams/%s/%s"] }`,
+     examName, examName + "_submission")
 
   var er1 execRequest // from exec.go handler
 
@@ -70,7 +70,8 @@ func ExamRun(rw http.ResponseWriter, req *http.Request) {
   }
 
   // Step 2: Run the make check target
-  var makeCheckCmd = `{ "command": ["make", "check"] }`
+  // The -s flag could be used instead of --no-print-directory, but -s strips a lot more.
+  var makeCheckCmd = fmt.Sprintf(`{ "command": ["make", "check", "--no-print-directory", "-C", "%s"] }`, "exams/" + examName)
 
   var er2 execRequest // from exec.go handler
 

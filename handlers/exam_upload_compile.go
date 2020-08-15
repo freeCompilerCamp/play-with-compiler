@@ -28,19 +28,48 @@ func ExamUploadCompile(rw http.ResponseWriter, req *http.Request) {
 	sessionId := vars["sessionId"]
 	instanceName := vars["instanceName"]
 
+  s, err := core.SessionGet(sessionId)
+  if err == storage.NotFoundError {
+    rw.WriteHeader(http.StatusNotFound)
+    return
+  } else if err != nil {
+    rw.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+  i := core.InstanceGet(s, instanceName)
+
+  // Step 0: Grab the necessary resources from the hosted endpoint
+  var cloneCmd = fmt.Sprintf(
+    `{ "command":
+    ["git", "clone", "%s", "."]
+    }`,
+    config.ExamEndpoint)
+
+  var er1 execRequest // from exec.go handler
+
+  err = json.NewDecoder(strings.NewReader(cloneCmd)).Decode(&er1)
+  if err != nil {
+    log.Fatal(err)
+    rw.WriteHeader(http.StatusBadRequest)
+    return
+  }
+
+  code, err := core.InstanceExec(i, er1.Cmd)
+
+  if err != nil {
+    log.Printf("Error executing command; code: %s, error: %s", code, err)
+    rw.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+
+  log.Printf("Obtained exam resources from endpoint.")
+
   // Step 1: upload the code to the instance
 
-	s, err := core.SessionGet(sessionId)
-	if err == storage.NotFoundError {
-		rw.WriteHeader(http.StatusNotFound)
-		return
-	} else if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	i := core.InstanceGet(s, instanceName)
-
 	// allow up to 32 MB which is the default
+
+  // Grab the exam name that we will use to match the directory at the host endpoint
+  examName := req.URL.Query().Get("examname")
 
 	red, err := req.MultipartReader()
 	if err != nil {
@@ -48,7 +77,7 @@ func ExamUploadCompile(rw http.ResponseWriter, req *http.Request) {
 		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	path := req.URL.Query().Get("path")
+	path := req.URL.Query().Get("path") + "/exams/" + examName
 
 	for {
 		p, err := red.NextPart()
@@ -73,53 +102,9 @@ func ExamUploadCompile(rw http.ResponseWriter, req *http.Request) {
 		log.Printf("Uploaded [%s] to [%s]\n", p.FileName(), i.Name)
   }
 
-	// Step 1.5: Grab resources from server/endpoint
-
-  // Grab the exam name that we will use to match the directory at the host endpoint
-  examName := req.URL.Query().Get("examname")
-
-  // Get the cut length from the resource host endpoint. We need this for wget.
-  // If the endpoint contains http or https, we ignore that.
-  // e.g.: if the endpoint is https://localhost/llnl-freecompilercamp/freecc_tests/
-  // the cutlength is 3.
-  var cutlen = strings.Count(config.ExamEndpoint, "/")
-  if strings.Contains(config.ExamEndpoint, "http") || strings.Contains(config.ExamEndpoint, "https") {
-    cutlen = cutlen - 2
-  }
-
-  // NOTE: The default WORKDIR set by the special rose-exam and llvm-exam images
-  // is the directory where code is uploaded. All of the commands below are
-  // executed in that directory implicitly (no need to cd)
-  // cutlen + 1 because it includes the folder for this specific exam.
-  var wgetCmd = fmt.Sprintf(
-    `{ "command":
-    ["wget", "-r", "-np", "-R", "index.html*", "-nH", "--cut-dirs=%d",
-    "%s/%s/"] }`,
-    cutlen + 1, config.ExamEndpoint, examName)
-
-  var er1 execRequest // from exec.go handler
-
-  err = json.NewDecoder(strings.NewReader(wgetCmd)).Decode(&er1)
-  if err != nil {
-    log.Fatal(err)
-    rw.WriteHeader(http.StatusBadRequest)
-    return
-  }
-
-  code, err := core.InstanceExec(i, er1.Cmd)
-
-  if err != nil {
-    log.Printf("Error executing command; status code: %s, error: %s", code, err)
-    rw.WriteHeader(http.StatusInternalServerError)
-    return
-  }
-
-  log.Printf("Obtained exam resources from endpoint.")
-
-
   // Step 2: Compile via make
 
-  var makeCmd = `{ "command": ["make", "-B"] }`
+  var makeCmd = fmt.Sprintf(`{ "command": ["make", "-B", "-C", "%s"] }`, path)
 
   var er2 execRequest // from exec.go handler
 
