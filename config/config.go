@@ -34,7 +34,8 @@ var PlaygroundDomain string
 
 var SegmentId string
 
-var ExamEndpoint string // endpoint for hosting closed-book test content
+var RoseExamEndpoint string
+var LLVMExamEndpoint string
 
 // TODO move this to a sync map so it can be updated on demand when the configuration for a playground changes
 var Providers = map[string]map[string]*oauth2.Config{}
@@ -62,7 +63,8 @@ func ParseFlags() {
 
 	flag.StringVar(&SegmentId, "segment-id", "", "Segment id to post metrics")
 
-	flag.StringVar(&ExamEndpoint, "exam-endpoint", "https://github.com/freeCompilerCamp/code-for-rose-tutorials", "GitHub host endpoint for closed-book exams")
+	flag.StringVar(&RoseExamEndpoint, "rose-exam-endpoint", "https://github.com/freeCompilerCamp/code-for-rose-tutorials", "GitHub host endpoint for closed-book ROSE exams")
+	flag.StringVar(&LLVMExamEndpoint, "llvm-exam-endpoint", "https://github.com/freeCompilerCamp/code-for-llvm-tutorials", "GitHub host endpoint for closed-book LLVM exams")
 
 	flag.Parse()
 

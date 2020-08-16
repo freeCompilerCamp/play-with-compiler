@@ -38,12 +38,26 @@ func ExamUploadCompile(rw http.ResponseWriter, req *http.Request) {
   }
   i := core.InstanceGet(s, instanceName)
 
+  compiler := req.URL.Query().Get("compiler")
+  var examEndpoint string
+
+  if compiler == "rose" {
+    log.Println("Using ROSE endpoint.")
+    examEndpoint = config.RoseExamEndpoint
+  } else if compiler == "llvm" {
+    log.Println("Using LLVM endpoint.")
+    examEndpoint = config.LLVMExamEndpoint
+  } else {
+    rw.WriteHeader(http.StatusBadRequest)
+    return
+  }
+
   // Step 0: Grab the necessary resources from the hosted endpoint
   var cloneCmd = fmt.Sprintf(
     `{ "command":
     ["git", "clone", "%s", "."]
     }`,
-    config.ExamEndpoint)
+    examEndpoint)
 
   var er1 execRequest // from exec.go handler
 
