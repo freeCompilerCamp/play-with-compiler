@@ -1,4 +1,4 @@
-# This dockerfile is a version of ROSE for online closed-book testing.
+# This dockerfile is a version of ROSE for online closed-book exams.
 # The only additional thing it does is add a directory for submissions at present.
 # However, future work may need to add other things, so we provide this special image.
 
@@ -142,10 +142,10 @@ ENV LIBRARY_PATH $ROSE_PATH/lib:$LIBRARY_PATH
 ENV MANPATH $ROSE_PATH/share/man:$MANPATH
 RUN alias ls='ls --color=auto'
 
-RUN mkdir $ROSE_SRC/freecc_tests
+RUN mkdir $ROSE_SRC/freecc_exams
 
-# Move to the testing directory
-WORKDIR /home/freecc/source/rose_src/freecc_tests
+# Move to the exam directory
+WORKDIR /home/freecc/source/rose_src/freecc_exams
 
 # Setup certs and ssh keys
 RUN mkdir ~/.ssh && ssh-keygen -N "" -t rsa -f ~/.ssh/id_rsa \
