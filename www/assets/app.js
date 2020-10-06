@@ -196,8 +196,8 @@
 
     // if PWC server use non-default 80 port, the new port could be set here to create the correct base link.
     // if not, leave the variable empty as the following line.
-    // var port_overwrite = '';
-    var port_overwrite = '5010';
+    var port_overwrite = '';
+    //var port_overwrite = '5010';
 
     if (port_overwrite) {
         base += ':' + port_overwrite;
