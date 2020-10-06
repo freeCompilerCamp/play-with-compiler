@@ -29,3 +29,18 @@ jobs:
         docker build . --file Dockerfile.middle --tag fcc_middle
         docker tag fcc_middle freecompilercamp/pwc:middle
         docker push freecompilercamp/pwc:middle
+
+    - name: Build the base image with GPU support
+      run: |
+        cd $GITHUB_WORKSPACE/dockerfiles/dind
+        docker build . --file Dockerfile.base-gpu --tag fcc_base_gpu
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_ID }} --password-stdin
+        docker tag fcc_base_gpu freecompilercamp/pwc:base-gpu
+        docker push freecompilercamp/pwc:base-gpu
+
+    - name: Build the middle image with GPU support
+      run: |
+        cd $GITHUB_WORKSPACE/dockerfiles/dind
+        docker build . --file Dockerfile.middle-gpu --tag fcc_middle_gpu
+        docker tag fcc_middle_gpu freecompilercamp/pwc:middle-gpu
+        docker push freecompilercamp/pwc:middle-gpu
