@@ -5,8 +5,8 @@ import (
 	"net"
 	"time"
 
-	client "docker.io/go-docker"
-	"docker.io/go-docker/api/types"
+	client "github.com/docker/docker/client"
+	"github.com/docker/docker/api/types"
 	"github.com/stretchr/testify/mock"
 )
 

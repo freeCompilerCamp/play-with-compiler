@@ -3,16 +3,15 @@ module github.com/play-with-docker/play-with-docker
 go 1.14
 
 require (
-	docker.io/go-docker v1.0.0
+	docker.io/go-docker v1.0.0 // indirect
 	github.com/Microsoft/go-winio v0.4.5 // indirect
 	github.com/PuerkitoBio/purell v1.1.0 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/aws/aws-sdk-go v1.12.15
 	github.com/beorn7/perks v0.0.0-20160804104726-4c0e84591b9a // indirect
 	github.com/containerd/containerd v1.0.0-beta.2
-	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/docker/distribution v2.6.0-rc.1.0.20170726174610-edc3ab29cdff+incompatible // indirect
-	github.com/docker/docker v1.4.2-0.20200309214505-aa6a9891b09c // indirect
+	github.com/docker/docker v1.4.2-0.20200309214505-aa6a9891b09c
 	github.com/docker/go-connections v0.3.0
 	github.com/docker/go-units v0.3.2
 	github.com/emicklei/go-restful v2.4.0+incompatible // indirect
@@ -25,7 +24,6 @@ require (
 	github.com/go-openapi/swag v0.0.0-20171111214437-cf0bdb963811 // indirect
 	github.com/gogo/protobuf v0.0.0-20170307180453-100ba4e88506 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
-	github.com/golang/protobuf v0.0.0-20170920220647-130e6b02ab05 // indirect
 	github.com/google/btree v0.0.0-20161217183710-316fb6d3f031 // indirect
 	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/google/go-github v13.0.1-0.20171014143926-a021c14a5f19+incompatible
@@ -54,24 +52,23 @@ require (
 	github.com/pkg/errors v0.8.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v0.8.0
-	github.com/prometheus/client_model v0.0.0-20170216185247-6f3806018612 // indirect
 	github.com/prometheus/common v0.0.0-20171006141418-1bab55dd05db // indirect
 	github.com/prometheus/procfs v0.0.0-20171017214025-a6e9df898b13 // indirect
 	github.com/rs/xid v0.0.0-20170604230408-02dd45c33376
 	github.com/satori/go.uuid v1.1.1-0.20170321230731-5bf94b69c6b6
 	github.com/shirou/gopsutil v2.16.13-0.20170924065440-6e221c482653+incompatible
+	github.com/sirupsen/logrus v1.7.0 // indirect
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/spf13/pflag v1.0.0 // indirect
 	github.com/stretchr/objx v0.0.0-20150928122152-1a9d0bb9f541 // indirect
-	github.com/stretchr/testify v1.1.5-0.20171018052257-2aa2c176b9da
+	github.com/stretchr/testify v1.2.2
 	github.com/urfave/negroni v0.2.0
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 	golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3
-	golang.org/x/oauth2 v0.0.0-20170928010508-bb50c06baba3
-	golang.org/x/sync v0.0.0-20170927054112-8e0aa688b654
-	golang.org/x/sys v0.0.0-20191010194322-b09406accb47 // indirect
+	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/text v0.3.0
-	google.golang.org/appengine v1.0.0 // indirect
+	google.golang.org/grpc v1.32.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/inf.v0 v0.9.0 // indirect
 	gopkg.in/yaml.v2 v2.0.0-20171116090243-287cf08546ab // indirect
