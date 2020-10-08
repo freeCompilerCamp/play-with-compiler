@@ -71,7 +71,7 @@ func ExamUploadCompile(rw http.ResponseWriter, req *http.Request) {
   code, err := core.InstanceExec(i, er1.Cmd)
 
   if err != nil {
-    log.Printf("Error executing command; code: %s, error: %s", code, err)
+    log.Printf("Error executing command; code: %d, error: %s", code, err)
     rw.WriteHeader(http.StatusInternalServerError)
     return
   }

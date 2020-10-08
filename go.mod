@@ -24,8 +24,6 @@ require (
 	github.com/go-openapi/swag v0.0.0-20171111214437-cf0bdb963811 // indirect
 	github.com/gogo/protobuf v0.0.0-20170307180453-100ba4e88506 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
-	github.com/google/btree v0.0.0-20161217183710-316fb6d3f031 // indirect
-	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/google/go-github v13.0.1-0.20171014143926-a021c14a5f19+incompatible
 	github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135 // indirect
 	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf // indirect
@@ -36,11 +34,12 @@ require (
 	github.com/gorilla/securecookie v0.0.0-20160422134519-667fe4e3466a
 	github.com/gorilla/websocket v1.2.0
 	github.com/gregjones/httpcache v0.0.0-20171119193500-2bcd89a1743f // indirect
-	github.com/hashicorp/golang-lru v0.0.0-20160813221303-0a025b7e63ad
-	github.com/huandu/facebook v2.1.0+incompatible
+	github.com/hashicorp/golang-lru v0.5.1
+	github.com/huandu/facebook v2.1.0+incompatible // indirect
 	github.com/inconshreveable/go-vhost v0.0.0-20160627193104-06d84117953b
 	github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8 // indirect
 	github.com/json-iterator/go v0.0.0-20171115153421-f7279a603ede // indirect
+	github.com/jteeuwen/go-bindata v3.0.7+incompatible
 	github.com/juju/ratelimit v1.0.1 // indirect
 	github.com/mailru/easyjson v0.0.0-20171120080333-32fa128f234d // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.0 // indirect
@@ -60,18 +59,17 @@ require (
 	github.com/sirupsen/logrus v1.7.0 // indirect
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/spf13/pflag v1.0.0 // indirect
-	github.com/stretchr/objx v0.0.0-20150928122152-1a9d0bb9f541 // indirect
-	github.com/stretchr/testify v1.2.2
+	github.com/stretchr/testify v1.4.0
 	github.com/urfave/negroni v0.2.0
-	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
-	golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3
-	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
-	golang.org/x/sync v0.0.0-20190423024810-112230192c58
-	golang.org/x/text v0.3.0
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/net v0.0.0-20200822124328-c89045814202
+	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
+	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
+	golang.org/x/text v0.3.3
+	google.golang.org/api v0.32.0
 	google.golang.org/grpc v1.32.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/inf.v0 v0.9.0 // indirect
-	gopkg.in/yaml.v2 v2.0.0-20171116090243-287cf08546ab // indirect
 	gotest.tools v2.2.0+incompatible // indirect
 	k8s.io/api v0.0.0-20171027084545-218912509d74 // indirect
 	k8s.io/apimachinery v0.0.0-20171027084411-18a564baac72

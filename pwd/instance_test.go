@@ -61,7 +61,6 @@ func TestInstanceNew(t *testing.T) {
 	_d.On("NetworkConnect", config.L2ContainerName, "aaaabbbbcccc", "").Return("10.0.0.1", nil)
 	_s.On("SessionPut", mock.AnythingOfType("*types.Session")).Return(nil)
 	_s.On("SessionCount").Return(1, nil)
-	_s.On("UserGet", mock.Anything).Return(&types.User{}, nil)
 	_s.On("ClientCount").Return(0, nil)
 	_s.On("InstanceCount").Return(0, nil)
 	_s.On("InstanceFindBySessionId", "aaaabbbbcccc").Return([]*types.Instance{}, nil)
@@ -135,7 +134,6 @@ func TestInstanceNew_WithNotAllowedImage(t *testing.T) {
 	_d.On("NetworkConnect", config.L2ContainerName, "aaaabbbbcccc", "").Return("10.0.0.1", nil)
 	_s.On("SessionPut", mock.AnythingOfType("*types.Session")).Return(nil)
 	_s.On("SessionCount").Return(1, nil)
-	_s.On("UserGet", mock.Anything).Return(&types.User{}, nil)
 	_s.On("ClientCount").Return(0, nil)
 	_s.On("InstanceCount").Return(0, nil)
 	_s.On("InstanceFindBySessionId", "aaaabbbbcccc").Return([]*types.Instance{}, nil)
@@ -151,6 +149,15 @@ func TestInstanceNew_WithNotAllowedImage(t *testing.T) {
 	session, err := p.SessionNew(context.Background(), sConfig)
 
 	assert.Nil(t, err)
+
+	// Switch to unsafe mode in order to test custom networks below
+	//
+	// TODO: move config away from being a global in order that we don't
+	// have to hack setting the context in this way.
+	config.Unsafe = true
+	defer func() {
+		config.Unsafe = false
+	}()
 
 	expectedInstance := types.Instance{
 		Name:        fmt.Sprintf("%s_aaaabbbbcccc", session.Id[:8]),
@@ -171,14 +178,15 @@ func TestInstanceNew_WithNotAllowedImage(t *testing.T) {
 		ServerKey:     nil,
 		CACert:        nil,
 		Privileged:    true,
-		Networks:      []string{session.Id},
+		Envs:          []string{"HELLO=WORLD"},
+		Networks:      []string{session.Id, "arpanet"},
 	}
 	_d.On("ContainerCreate", expectedContainerOpts).Return(nil)
 	_d.On("ContainerIPs", expectedInstance.Name).Return(map[string]string{session.Id: "10.0.0.1"}, nil)
 	_s.On("InstancePut", mock.AnythingOfType("*types.Instance")).Return(nil)
 	_e.M.On("Emit", event.INSTANCE_NEW, "aaaabbbbcccc", []interface{}{"aaaabbbb_aaaabbbbcccc", "10.0.0.1", "node1", "ip10-0-0-1-aaaabbbbcccc"}).Return()
 
-	instance, err := p.InstanceNew(session, types.InstanceConfig{ImageName: "redis"})
+	instance, err := p.InstanceNew(session, types.InstanceConfig{ImageName: "redis", Envs: []string{"HELLO=WORLD"}, Networks: []string{"arpanet"}})
 	assert.Nil(t, err)
 
 	assert.Equal(t, expectedInstance, *instance)
@@ -206,7 +214,6 @@ func TestInstanceNew_WithCustomHostname(t *testing.T) {
 	_d.On("DaemonHost").Return("localhost")
 	_d.On("NetworkConnect", config.L2ContainerName, "aaaabbbbcccc", "").Return("10.0.0.1", nil)
 	_s.On("SessionPut", mock.AnythingOfType("*types.Session")).Return(nil)
-	_s.On("UserGet", mock.Anything).Return(&types.User{}, nil)
 	_s.On("SessionCount").Return(1, nil)
 	_s.On("ClientCount").Return(0, nil)
 	_s.On("InstanceCount").Return(0, nil)

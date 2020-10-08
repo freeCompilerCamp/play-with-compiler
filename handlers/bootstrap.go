@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path"
 	"strings"
 	"time"
 
@@ -25,8 +26,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/urfave/negroni"
-	oauth2FB "golang.org/x/oauth2/facebook"
 	oauth2Github "golang.org/x/oauth2/github"
+	oauth2Google "golang.org/x/oauth2/google"
+	"google.golang.org/api/people/v1"
 )
 
 var core pwd.PWDApi
@@ -205,8 +207,15 @@ func initAssets(p *types.Playground) {
 		p.AssetsDir = "default"
 	}
 
+	lpath := path.Join(p.AssetsDir, "landing.html")
+	landing, err := config.Asset(lpath)
+	if err != nil {
+		log.Fatalf("Error loading %v: %v", lpath, err)
+	}
+
 	var b bytes.Buffer
-	t, err := template.New("landing.html").Delims("[[", "]]").ParseFiles(fmt.Sprintf("./www/%s/landing.html", p.AssetsDir))
+	t := template.New("landing.html").Delims("[[", "]]")
+	t, err = t.Parse(string(landing))
 	if err != nil {
 		log.Fatalf("Error parsing template %v", err)
 	}
@@ -233,15 +242,15 @@ func initOauthProviders(p *types.Playground) {
 
 		config.Providers[p.Id]["github"] = conf
 	}
-	if p.FacebookClientID != "" && p.FacebookClientSecret != "" {
+	if p.GoogleClientID != "" && p.GoogleClientSecret != "" {
 		conf := &oauth2.Config{
-			ClientID:     p.FacebookClientID,
-			ClientSecret: p.FacebookClientSecret,
-			Scopes:       []string{"email", "public_profile"},
-			Endpoint:     oauth2FB.Endpoint,
+			ClientID:     p.GoogleClientID,
+			ClientSecret: p.GoogleClientSecret,
+			Scopes:       []string{people.UserinfoEmailScope, people.UserinfoProfileScope},
+			Endpoint:     oauth2Google.Endpoint,
 		}
 
-		config.Providers[p.Id]["facebook"] = conf
+		config.Providers[p.Id]["google"] = conf
 	}
 	if p.DockerClientID != "" && p.DockerClientSecret != "" {
 

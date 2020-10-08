@@ -39,4 +39,6 @@ type InstanceConfig struct {
 	PlaygroundFQDN string
 	Type           string
 	DindVolumeSize string
+	Envs           []string
+	Networks       []string
 }
