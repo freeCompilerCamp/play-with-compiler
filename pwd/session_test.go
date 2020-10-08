@@ -2,6 +2,7 @@ package pwd
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -35,7 +36,6 @@ func TestSessionNew(t *testing.T) {
 	_d.On("DaemonHost").Return("localhost")
 	_d.On("NetworkConnect", config.L2ContainerName, "aaaabbbbcccc", "").Return("10.0.0.1", nil)
 	_s.On("SessionPut", mock.AnythingOfType("*types.Session")).Return(nil)
-	_s.On("UserGet", mock.Anything).Return(&types.User{}, nil)
 	_s.On("SessionCount").Return(1, nil)
 	_s.On("InstanceCount").Return(0, nil)
 	_s.On("ClientCount").Return(0, nil)
@@ -96,10 +96,11 @@ func TestSessionFailWhenUserIsBanned(t *testing.T) {
 	p.generator = _g
 
 	playground := &types.Playground{Id: "foobar"}
-	sConfig := types.SessionConfig{Playground: playground, UserId: "", Duration: time.Hour, Stack: "", StackName: "", ImageName: ""}
+	sConfig := types.SessionConfig{Playground: playground, UserId: "some_user", Duration: time.Hour, Stack: "", StackName: "", ImageName: ""}
 	s, e := p.SessionNew(context.Background(), sConfig)
 	assert.NotNil(t, e)
 	assert.Nil(t, s)
+	assert.True(t, errors.Is(e, userBannedError))
 	assert.Contains(t, e.Error(), "banned")
 
 	_d.AssertExpectations(t)

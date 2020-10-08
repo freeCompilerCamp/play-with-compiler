@@ -214,20 +214,22 @@ func (d *docker) CreateAttachConnection(name string) (net.Conn, error) {
 }
 
 func (d *docker) CopyToContainer(containerName, destination, fileName string, content io.Reader) error {
-	r, w := io.Pipe()
-	b, readErr := ioutil.ReadAll(content)
-	if readErr != nil {
-		return readErr
+	contents, err := ioutil.ReadAll(content)
+	if err != nil {
+		return err
 	}
-	t := tar.NewWriter(w)
-	go func() {
-		// Have to use uid and gid rather than uname and gname. FreeCC user uid and gid is 9999.
-		t.WriteHeader(&tar.Header{Name: fileName, Mode: 0600, Size: int64(len(b)), Uid: 9999, Gid: 9999, ModTime: time.Now()})
-		t.Write(b)
-		t.Close()
-		w.Close()
-	}()
-	return d.c.CopyToContainer(context.Background(), containerName, destination, r, types.CopyToContainerOptions{AllowOverwriteDirWithFile: true})
+	var buf bytes.Buffer
+	t := tar.NewWriter(&buf)
+	if err := t.WriteHeader(&tar.Header{Name: fileName, Mode: 0600, Size: int64(len(contents)), ModTime: time.Now()}); err != nil {
+		return err
+	}
+	if _, err := t.Write(contents); err != nil {
+		return err
+	}
+	if err := t.Close(); err != nil {
+		return err
+	}
+	return d.c.CopyToContainer(context.Background(), containerName, destination, &buf, types.CopyToContainerOptions{AllowOverwriteDirWithFile: true, CopyUIDGID: true})
 }
 
 func (d *docker) CopyFromContainer(containerName, filePath string) (io.Reader, error) {
@@ -263,6 +265,7 @@ type CreateContainerOpts struct {
 	Labels         map[string]string
 	Networks       []string
 	DindVolumeSize string
+	Envs           []string
 }
 
 func (d *docker) ContainerCreate(opts CreateContainerOpts) (err error) {
@@ -270,7 +273,7 @@ func (d *docker) ContainerCreate(opts CreateContainerOpts) (err error) {
 	containerDir := "/opt/pwd"
 	containerCertDir := fmt.Sprintf("%s/certs", containerDir)
 
-	env := []string{fmt.Sprintf("SESSION_ID=%s", opts.SessionId)}
+	env := append(opts.Envs, fmt.Sprintf("SESSION_ID=%s", opts.SessionId))
 
 	// Write certs to container cert dir
 	if len(opts.ServerCert) > 0 {
