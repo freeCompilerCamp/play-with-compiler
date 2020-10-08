@@ -314,11 +314,13 @@ func (d *docker) ContainerCreate(opts CreateContainerOpts) (err error) {
 	}
 	h.Resources.PidsLimit = &pidsLimit
 
-	gpu := container.DeviceRequest{}
-	gpu.Driver = "nvidia"
-	gpu.Count = -1
-	gpu.Capabilities = append(gpu.Capabilities, []string{"gpu"})
-	h.Resources.DeviceRequests = append(h.Resources.DeviceRequests, gpu)
+	if config.UseGPU {
+		gpu := container.DeviceRequest{}
+		gpu.Driver = "nvidia"
+		gpu.Count = -1
+		gpu.Capabilities = append(gpu.Capabilities, []string{"gpu"})
+		h.Resources.DeviceRequests = append(h.Resources.DeviceRequests, gpu)
+	}
 
 	if memLimit := os.Getenv("MAX_MEMORY_MB"); memLimit != "" {
 		if i, err := strconv.Atoi(memLimit); err == nil {
