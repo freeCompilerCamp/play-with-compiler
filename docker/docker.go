@@ -220,7 +220,7 @@ func (d *docker) CopyToContainer(containerName, destination, fileName string, co
 	}
 	var buf bytes.Buffer
 	t := tar.NewWriter(&buf)
-	if err := t.WriteHeader(&tar.Header{Name: fileName, Mode: 0600, Size: int64(len(contents)), ModTime: time.Now()}); err != nil {
+	if err := t.WriteHeader(&tar.Header{Name: fileName, Mode: 0600, Size: int64(len(contents)), Uid: 9999, Gid: 9999, ModTime: time.Now()}); err != nil {
 		return err
 	}
 	if _, err := t.Write(contents); err != nil {
@@ -229,7 +229,7 @@ func (d *docker) CopyToContainer(containerName, destination, fileName string, co
 	if err := t.Close(); err != nil {
 		return err
 	}
-	return d.c.CopyToContainer(context.Background(), containerName, destination, &buf, types.CopyToContainerOptions{AllowOverwriteDirWithFile: true, CopyUIDGID: true})
+	return d.c.CopyToContainer(context.Background(), containerName, destination, &buf, types.CopyToContainerOptions{AllowOverwriteDirWithFile: true})
 }
 
 func (d *docker) CopyFromContainer(containerName, filePath string) (io.Reader, error) {
