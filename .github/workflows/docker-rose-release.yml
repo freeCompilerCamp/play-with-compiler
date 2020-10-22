@@ -1,0 +1,23 @@
+name: Docker Image ROSE Release Weekly
+
+on:
+  schedule:
+    - cron: '0 1 * * 0'
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build the docker image of ROSE release branch
+      run: |
+        cd $GITHUB_WORKSPACE/dockerfiles/dind
+        docker build . --file Dockerfile.rose-release --tag freecc_rose_release
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_ID }} --password-stdin
+        docker tag freecc_rose_release freecompilercamp/pwc:rose-release-weekly
+        docker push freecompilercamp/pwc:rose-release-weekly
+
